@@ -1,0 +1,10 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #F0F2F2;
+    max-width: 1200px;
+    margin: 0 auto;
+}
