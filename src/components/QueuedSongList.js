@@ -1,18 +1,26 @@
+import { useMutation } from '@apollo/client';
 import { Delete } from '@mui/icons-material';
 import { Avatar, Typography, IconButton, useMediaQuery } from '@mui/material';
 import React from 'react';
+import { ADD_OR_REMOVE_FROM_QUEUE } from '../graphql/mutations';
 
-const song = {
-  title: '7 rings',
-  artist: 'Ariana Grande',
-  thumbnail:
-    'https://nzmcd.co.nz/wp-content/uploads/2023/04/Te-Pae-300x225.jpg.webp'
-};
-
-export default function QueuedSongList() {
+export default function QueuedSongList({ queue }) {
+  console.log(queue);
   const greaterThanMd = useMediaQuery((theme) => theme.breakpoints.up('md'));
 
   const QueuedSong = ({ song }) => {
+    const [addOrRemoveFromQueue] = useMutation(ADD_OR_REMOVE_FROM_QUEUE, {
+      onCompleted: (data) =>
+        localStorage.setItem('queue', JSON.stringify(data.addOrRemoveFromQueue))
+    });
+
+    const addOrRemoveFromQueueHandler = () => {
+      addOrRemoveFromQueue({
+        variables: {
+          input: { ...song, __typename: 'Song' }
+        }
+      });
+    };
     return (
       <div
         style={{
@@ -44,7 +52,7 @@ export default function QueuedSongList() {
             {song.artist}
           </Typography>
         </div>
-        <IconButton>
+        <IconButton onClick={addOrRemoveFromQueueHandler}>
           <Delete color='error' />
         </IconButton>
       </div>
@@ -55,9 +63,9 @@ export default function QueuedSongList() {
     greaterThanMd && (
       <div style={{ margin: '10px 0' }}>
         <Typography color='textSecondary' variant='button'>
-          QUEUE (5)
+          QUEUE ({queue.length})
         </Typography>
-        {Array.from({ length: 5 }, () => song).map((song, i) => (
+        {queue.map((song, i) => (
           <QueuedSong key={i} song={song} />
         ))}
       </div>

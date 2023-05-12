@@ -1,4 +1,5 @@
-import { PlayArrow, Save } from '@mui/icons-material';
+import { useMutation, useSubscription } from '@apollo/client';
+import { Pause, PlayArrow, Save } from '@mui/icons-material';
 import {
   Card,
   CardActions,
@@ -8,19 +9,45 @@ import {
   IconButton,
   Typography
 } from '@mui/material';
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { GET_SONGS } from '../graphql/subscriptions';
+import { SongContext } from '../App';
+import { ADD_OR_REMOVE_FROM_QUEUE } from '../graphql/mutations';
 
 export default function SongList() {
-  let loading = false;
-
-  const song = {
-    title: '7 rings',
-    artist: 'Ariana Grande',
-    thumbnail:
-      'https://nzmcd.co.nz/wp-content/uploads/2023/04/Te-Pae-300x225.jpg.webp'
-  };
+  const { data, loading, error } = useSubscription(GET_SONGS);
 
   const Song = ({ song }) => {
+    const { id } = song;
+    const [addOrRemoveFromQueue] = useMutation(ADD_OR_REMOVE_FROM_QUEUE, {
+      onCompleted: (data) =>
+        localStorage.setItem('queue', JSON.stringify(data.addOrRemoveFromQueue))
+    });
+    const { state, dispatch } = useContext(SongContext);
+    const [currentSongPlaying, setCurrentSongPlaying] = useState(false);
+
+    useEffect(() => {
+      const isSongPlaying = state.isPlaying && id === state.song.id;
+      if (isSongPlaying) {
+        setCurrentSongPlaying(true);
+      }
+    }, [id, state.song.id, state.isPlaying]);
+
+    const togglePlayHander = () => {
+      dispatch({ type: 'SET_SONG', payload: { song } });
+      dispatch(
+        state.isPlaying ? { type: 'PAUSE_SONG' } : { type: 'PLAY_SONG' }
+      );
+    };
+
+    const addOrRemoveFromQueueHandler = () => {
+      addOrRemoveFromQueue({
+        variables: {
+          input: { ...song, __typename: 'Song' }
+        }
+      });
+    };
+
     return (
       <Card sx={{ margin: 2 }}>
         <div
@@ -48,10 +75,18 @@ export default function SongList() {
               </Typography>
             </CardContent>
             <CardActions>
-              <IconButton size='small' color='primary'>
-                <PlayArrow />
+              <IconButton
+                size='small'
+                color='primary'
+                onClick={togglePlayHander}
+              >
+                {currentSongPlaying ? <Pause /> : <PlayArrow />}
               </IconButton>
-              <IconButton size='small' color='secondary'>
+              <IconButton
+                size='small'
+                color='secondary'
+                onClick={addOrRemoveFromQueueHandler}
+              >
                 <Save />
               </IconButton>
             </CardActions>
@@ -75,10 +110,12 @@ export default function SongList() {
       </div>
     );
   }
+  if (error) return <div>Error fetching songs</div>;
+
   return (
     <div>
-      {Array.from({ length: 10 }, () => song).map((song, i) => (
-        <Song key={i} song={song} />
+      {data.songs.map((song) => (
+        <Song key={song.id} song={song} />
       ))}
     </div>
   );

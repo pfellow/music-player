@@ -6,13 +6,29 @@ import Header from './components/Header';
 import SongList from './components/SongList';
 import SongPlayer from './components/SongPlayer';
 import { Hidden } from '@mui/material';
+import { createContext, useReducer, useContext } from 'react';
+import { songReducer } from './songReducer';
+
+export const SongContext = createContext({
+  song: {
+    id: '1878636e-3501-470a-b1dc-14014e892d72',
+    title: 'Muddy Feet',
+    artist: 'Miley Cyrus ft. Sia',
+    thumbnail: 'http://img.youtube.com/vi/mpl4iNPn7QY/0.jpg',
+    duration: 137,
+    url: 'https://www.youtube.com/watch?v=mpl4iNPn7QY'
+  },
+  isPlaying: false
+});
 
 function App() {
+  const initialSongState = useContext(SongContext);
+  const [state, dispatch] = useReducer(songReducer, initialSongState);
   const greaterThanMd = useMediaQuery((theme) => theme.breakpoints.up('md'));
   const greaterThanSm = useMediaQuery((theme) => theme.breakpoints.up('sm'));
 
   return (
-    <div>
+    <SongContext.Provider value={{ state, dispatch }}>
       <Hidden only='xs'>
         <Header />
       </Hidden>
@@ -44,7 +60,7 @@ function App() {
           <SongPlayer />
         </Grid>
       </Grid>
-    </div>
+    </SongContext.Provider>
   );
 }
 
