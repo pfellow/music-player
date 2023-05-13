@@ -1,5 +1,10 @@
 import { useMutation, useSubscription } from '@apollo/client';
-import { Pause, PlayArrow, Save } from '@mui/icons-material';
+import {
+  Pause,
+  PlayArrow,
+  Save,
+  HighlightOffOutlined
+} from '@mui/icons-material';
 import {
   Card,
   CardActions,
@@ -7,12 +12,13 @@ import {
   CardMedia,
   CircularProgress,
   IconButton,
-  Typography
+  Typography,
+  Box
 } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { GET_SONGS } from '../graphql/subscriptions';
 import { SongContext } from '../App';
-import { ADD_OR_REMOVE_FROM_QUEUE } from '../graphql/mutations';
+import { ADD_OR_REMOVE_FROM_QUEUE, REMOVE_SONG } from '../graphql/mutations';
 
 export default function SongList() {
   const { data, loading, error } = useSubscription(GET_SONGS);
@@ -25,6 +31,7 @@ export default function SongList() {
     });
     const { state, dispatch } = useContext(SongContext);
     const [currentSongPlaying, setCurrentSongPlaying] = useState(false);
+    const [removeSong] = useMutation(REMOVE_SONG);
 
     useEffect(() => {
       const isSongPlaying = state.isPlaying && id === state.song.id;
@@ -35,9 +42,9 @@ export default function SongList() {
 
     const togglePlayHander = () => {
       dispatch({ type: 'SET_SONG', payload: { song } });
-      dispatch(
-        state.isPlaying ? { type: 'PAUSE_SONG' } : { type: 'PLAY_SONG' }
-      );
+      currentSongPlaying
+        ? dispatch({ type: 'PAUSE_SONG' })
+        : dispatch({ type: 'PLAY_SONG' });
     };
 
     const addOrRemoveFromQueueHandler = () => {
@@ -48,8 +55,21 @@ export default function SongList() {
       });
     };
 
+    const removeSongHandler = async () => {
+      try {
+        await removeSong({
+          variables: {
+            id: id
+          }
+        });
+      } catch (error) {
+        console.error('Error removing song', song);
+        return;
+      }
+    };
+
     return (
-      <Card sx={{ margin: 2 }}>
+      <Card sx={{ margin: 2, maxWidth: '700px' }}>
         <div
           style={{
             display: 'flex'
@@ -74,21 +94,35 @@ export default function SongList() {
                 {song.artist}
               </Typography>
             </CardContent>
-            <CardActions>
-              <IconButton
-                size='small'
-                color='primary'
-                onClick={togglePlayHander}
-              >
-                {currentSongPlaying ? <Pause /> : <PlayArrow />}
-              </IconButton>
-              <IconButton
-                size='small'
-                color='secondary'
-                onClick={addOrRemoveFromQueueHandler}
-              >
-                <Save />
-              </IconButton>
+            <CardActions
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between'
+              }}
+            >
+              <Box>
+                <IconButton size='small' onClick={removeSongHandler}>
+                  <HighlightOffOutlined sx={{ color: '#802922' }} />
+                </IconButton>
+              </Box>
+              <Box>
+                <IconButton
+                  size='small'
+                  color='primary'
+                  onClick={togglePlayHander}
+                >
+                  {currentSongPlaying ? <Pause /> : <PlayArrow />}
+                </IconButton>
+                <IconButton
+                  size='small'
+                  color='secondary'
+                  onClick={addOrRemoveFromQueueHandler}
+                >
+                  <Save />
+                </IconButton>
+              </Box>
             </CardActions>
           </div>
         </div>

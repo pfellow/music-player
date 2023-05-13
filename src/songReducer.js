@@ -12,8 +12,8 @@ export const songReducer = (state, action) => {
       };
     case 'SET_SONG':
       return {
-        ...state,
-        song: action.payload.song
+        song: action.payload.song,
+        isPlaying: false
       };
     default:
       return state;

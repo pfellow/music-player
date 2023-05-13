@@ -22,6 +22,14 @@ export const ADD_SONG = gql`
   }
 `;
 
+export const REMOVE_SONG = gql`
+  mutation removeSong($id: uuid!) {
+    delete_songs(where: { id: { _eq: $id } }) {
+      affected_rows
+    }
+  }
+`;
+
 export const ADD_OR_REMOVE_FROM_QUEUE = gql`
   mutation addOrRemoveFromQueue($input: SongInput!) {
     addOrRemoveFromQueue(input: $input) @client

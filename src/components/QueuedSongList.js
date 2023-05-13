@@ -1,13 +1,34 @@
 import { useMutation } from '@apollo/client';
-import { Delete } from '@mui/icons-material';
+import { Delete, Pause, PlayArrow } from '@mui/icons-material';
 import { Avatar, Typography, IconButton, useMediaQuery } from '@mui/material';
-import React from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ADD_OR_REMOVE_FROM_QUEUE } from '../graphql/mutations';
+import { SongContext } from '../App';
 
 export default function QueuedSongList({ queue }) {
   const greaterThanMd = useMediaQuery((theme) => theme.breakpoints.up('md'));
 
   const QueuedSong = ({ song }) => {
+    const { state, dispatch } = useContext(SongContext);
+    const [currentSongPlaying, setCurrentSongPlaying] = useState(false);
+
+    useEffect(() => {
+      const isSongPlaying = state.isPlaying && song.id === state.song.id;
+      if (isSongPlaying) {
+        setCurrentSongPlaying(true);
+      }
+    }, [state, song]);
+
+    const togglePlayHander = () => {
+      if (currentSongPlaying) {
+        dispatch({ type: 'PAUSE_SONG' });
+      } else if (song.id === state.song.id) {
+        dispatch({ type: 'PLAY_SONG' });
+      } else {
+        dispatch({ type: 'SET_SONG', payload: { song } });
+        dispatch({ type: 'PLAY_SONG' });
+      }
+    };
     const [addOrRemoveFromQueue] = useMutation(ADD_OR_REMOVE_FROM_QUEUE, {
       onCompleted: (data) =>
         localStorage.setItem('queue', JSON.stringify(data.addOrRemoveFromQueue))
@@ -25,7 +46,7 @@ export default function QueuedSongList({ queue }) {
         style={{
           display: 'grid',
           gridAutoFlow: 'column',
-          gridTemplateColumns: '50px auto 50px',
+          gridTemplateColumns: '50px auto 100px',
           gridGap: 12,
           alignItems: 'center',
           marginTop: 10,
@@ -52,9 +73,18 @@ export default function QueuedSongList({ queue }) {
             {song.artist}
           </Typography>
         </div>
-        <IconButton onClick={addOrRemoveFromQueueHandler}>
-          <Delete color='error' />
-        </IconButton>
+        <div style={{ display: 'flex' }}>
+          <IconButton onClick={togglePlayHander}>
+            {currentSongPlaying ? (
+              <Pause sx={{ height: 30, width: 30 }} />
+            ) : (
+              <PlayArrow sx={{ height: 30, width: 30 }} />
+            )}
+          </IconButton>
+          <IconButton onClick={addOrRemoveFromQueueHandler}>
+            <Delete sx={{ color: '#802922' }} />
+          </IconButton>
+        </div>
       </div>
     );
   };

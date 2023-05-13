@@ -1,5 +1,6 @@
 import { AddBoxOutlined, Link } from '@mui/icons-material';
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -10,7 +11,6 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useMutation } from '@apollo/client';
-import styles from './AddSong.module.css';
 import ReactPlayer from 'react-player';
 import SoundCloudPlayer from 'react-player/soundcloud';
 import YouTubePlayer from 'react-player/youtube';
@@ -49,7 +49,6 @@ export default function AddSong() {
   };
 
   const handleEditSong = async ({ player }) => {
-    console.log('handleEditSong');
     const nestedPlayer = player.player.player;
     let songData;
     if (nestedPlayer.getVideoData) {
@@ -98,6 +97,7 @@ export default function AddSong() {
     return new Promise((resolve) => {
       player.getCurrentSound((songData) => {
         if (songData) {
+          console.log(songData);
           resolve({
             duration: Number(songData.duration / 1000),
             title: songData.title,
@@ -116,19 +116,21 @@ export default function AddSong() {
   const { thumbnail, title, artist } = song;
 
   return (
-    <div className={styles.container}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        margin: 2
+      }}
+    >
       <Dialog
         open={dialog}
         onClose={handleCloseDialog}
-        className={styles.dialog}
+        sx={{ textAlign: 'center' }}
       >
         <DialogTitle>Edit Song</DialogTitle>
         <DialogContent>
-          <img
-            src={thumbnail}
-            alt='Song Thumbnail'
-            className={styles.thumbnail}
-          />
+          <img src={thumbnail} alt='Song Thumbnail' style={{ width: '90%' }} />
           <TextField
             value={title}
             onChange={changeSongHandler}
@@ -176,34 +178,43 @@ export default function AddSong() {
           </Button>
         </DialogActions>
       </Dialog>
-      <TextField
+      <Box
         sx={{
-          margin: 1
+          display: 'flex',
+          alignItems: 'center',
+          width: '100%',
+          maxWidth: 700
         }}
-        variant='standard'
-        placeholder='Add Youtube or Soundcloud Url'
-        onChange={(e) => setUrl(e.target.value)}
-        value={url}
-        fullWidth
-        type='url'
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <Link />
-            </InputAdornment>
-          )
-        }}
-      />
-      <Button
-        disabled={!playable}
-        variant='contained'
-        color='primary'
-        endIcon={<AddBoxOutlined />}
-        onClick={() => setDialog(true)}
       >
-        Add
-      </Button>
+        <TextField
+          sx={{
+            mr: 2
+          }}
+          fullWidth
+          variant='standard'
+          placeholder='Add Youtube or Soundcloud Url'
+          onChange={(e) => setUrl(e.target.value)}
+          value={url}
+          type='url'
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <Link />
+              </InputAdornment>
+            )
+          }}
+        />
+        <Button
+          disabled={!playable}
+          variant='contained'
+          color='primary'
+          endIcon={<AddBoxOutlined />}
+          onClick={() => setDialog(true)}
+        >
+          Add
+        </Button>
+      </Box>
       <ReactPlayer url={url} hidden onReady={handleEditSong} />
-    </div>
+    </Box>
   );
 }

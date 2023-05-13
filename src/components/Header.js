@@ -8,7 +8,7 @@ export default function Header() {
       <Toolbar>
         <HeadsetTwoTone />
         <Typography sx={{ ml: 2 }} variant='h6' component='h1'>
-          Apollo Music Share and Player
+          React Youtube and Soundcloud Music Player
         </Typography>
       </Toolbar>
     </AppBar>

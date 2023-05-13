@@ -4,7 +4,8 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import AddSong from './components/AddSong';
 import Header from './components/Header';
 import SongList from './components/SongList';
-import SongPlayer from './components/SongPlayer';
+import SongPlayer from './components/SongPlayer/SongPlayer';
+import QueuedSongList from './components/QueuedSongList';
 import { Hidden } from '@mui/material';
 import { createContext, useReducer, useContext, useEffect } from 'react';
 import { songReducer } from './songReducer';
@@ -13,12 +14,12 @@ import { GET_QUEUED_SONGS, GET_SONGS } from './graphql/queries';
 
 export const SongContext = createContext({
   song: {
-    id: '1878636e-3501-470a-b1dc-14014e892d72',
-    title: 'Muddy Feet',
-    artist: 'Miley Cyrus ft. Sia',
-    thumbnail: 'http://img.youtube.com/vi/mpl4iNPn7QY/0.jpg',
-    duration: 137,
-    url: 'https://www.youtube.com/watch?v=mpl4iNPn7QY'
+    id: '',
+    title: '',
+    artist: '',
+    thumbnail: '',
+    duration: 0,
+    url: ''
   },
   isPlaying: false
 });
@@ -36,7 +37,7 @@ function App() {
   const [state, dispatch] = useReducer(songReducer, initialSongState);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && state.song.id === '') {
       if (savedSongs?.songs[0]) {
         dispatch({
           type: 'SET_SONG',
@@ -44,7 +45,7 @@ function App() {
         });
       }
     }
-  }, [loading]);
+  }, [savedSongs, loading, state.song]);
 
   const greaterThanMd = useMediaQuery((theme) => theme.breakpoints.up('md'));
   const greaterThanSm = useMediaQuery((theme) => theme.breakpoints.up('sm'));
@@ -73,13 +74,14 @@ function App() {
                   right: 0,
                   top: 70
                 }
-              : { position: 'fixed', width: '100%', left: 0, bottom: 0 }
+              : { position: 'fixed', width: '100%', left: 0, bottom: 10 }
           }
           item
           xs={12}
           md={5}
         >
           <SongPlayer />
+          <QueuedSongList queue={queueData.queue} />
         </Grid>
       </Grid>
     </SongContext.Provider>
