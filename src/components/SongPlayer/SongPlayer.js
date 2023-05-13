@@ -66,6 +66,9 @@ export default function SongPlayer() {
         url={state.song.url}
         playing={state.isPlaying}
         hidden
+        onReady={() => {
+          dispatch({ type: 'INITIATE' });
+        }}
       />
     </>
   );

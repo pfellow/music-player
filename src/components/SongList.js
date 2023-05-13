@@ -41,10 +41,13 @@ export default function SongList() {
     }, [id, state.song.id, state.isPlaying]);
 
     const togglePlayHander = () => {
-      dispatch({ type: 'SET_SONG', payload: { song } });
-      currentSongPlaying
-        ? dispatch({ type: 'PAUSE_SONG' })
-        : dispatch({ type: 'PLAY_SONG' });
+      if (currentSongPlaying) {
+        dispatch({ type: 'PAUSE_SONG' });
+      } else if (song.id === state.song.id) {
+        dispatch({ type: 'PLAY_SONG' });
+      } else {
+        dispatch({ type: 'SET_SONG', payload: { song } });
+      }
     };
 
     const addOrRemoveFromQueueHandler = () => {

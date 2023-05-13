@@ -26,7 +26,6 @@ export default function QueuedSongList({ queue }) {
         dispatch({ type: 'PLAY_SONG' });
       } else {
         dispatch({ type: 'SET_SONG', payload: { song } });
-        dispatch({ type: 'PLAY_SONG' });
       }
     };
     const [addOrRemoveFromQueue] = useMutation(ADD_OR_REMOVE_FROM_QUEUE, {

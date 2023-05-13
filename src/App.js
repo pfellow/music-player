@@ -21,20 +21,21 @@ export const SongContext = createContext({
     duration: 0,
     url: ''
   },
-  isPlaying: false
+  isPlaying: false,
+  initiated: false
 });
 
 function App() {
   const { data: savedSongs, loading } = useQuery(GET_SONGS);
   const { data: queueData } = useQuery(GET_QUEUED_SONGS);
   let initialSongState = useContext(SongContext);
-  if (queueData.queue[0]) {
-    initialSongState = {
-      song: queueData.queue[0],
-      isPlaying: false
-    };
-  }
   const [state, dispatch] = useReducer(songReducer, initialSongState);
+
+  useEffect(() => {
+    if (queueData.queue[0]) {
+      dispatch({ type: 'SET_SONG', payload: { song: queueData.queue[0] } });
+    }
+  }, [queueData]);
 
   useEffect(() => {
     if (!loading && state.song.id === '') {

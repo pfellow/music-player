@@ -12,9 +12,21 @@ export const songReducer = (state, action) => {
       };
     case 'SET_SONG':
       return {
-        song: action.payload.song,
-        isPlaying: false
+        ...state,
+        song: action.payload.song
       };
+    case 'INITIATE':
+      if (!state.initiated) {
+        return {
+          ...state,
+          initiated: true
+        };
+      } else {
+        return {
+          ...state,
+          isPlaying: true
+        };
+      }
     default:
       return state;
   }
