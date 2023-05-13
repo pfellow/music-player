@@ -5,7 +5,6 @@ import React from 'react';
 import { ADD_OR_REMOVE_FROM_QUEUE } from '../graphql/mutations';
 
 export default function QueuedSongList({ queue }) {
-  console.log(queue);
   const greaterThanMd = useMediaQuery((theme) => theme.breakpoints.up('md'));
 
   const QueuedSong = ({ song }) => {
@@ -29,7 +28,8 @@ export default function QueuedSongList({ queue }) {
           gridTemplateColumns: '50px auto 50px',
           gridGap: 12,
           alignItems: 'center',
-          marginTop: 10
+          marginTop: 10,
+          maxWidth: '600px'
         }}
       >
         <Avatar

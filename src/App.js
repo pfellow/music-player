@@ -6,8 +6,10 @@ import Header from './components/Header';
 import SongList from './components/SongList';
 import SongPlayer from './components/SongPlayer';
 import { Hidden } from '@mui/material';
-import { createContext, useReducer, useContext } from 'react';
+import { createContext, useReducer, useContext, useEffect } from 'react';
 import { songReducer } from './songReducer';
+import { useQuery } from '@apollo/client';
+import { GET_QUEUED_SONGS, GET_SONGS } from './graphql/queries';
 
 export const SongContext = createContext({
   song: {
@@ -22,8 +24,28 @@ export const SongContext = createContext({
 });
 
 function App() {
-  const initialSongState = useContext(SongContext);
+  const { data: savedSongs, loading } = useQuery(GET_SONGS);
+  const { data: queueData } = useQuery(GET_QUEUED_SONGS);
+  let initialSongState = useContext(SongContext);
+  if (queueData.queue[0]) {
+    initialSongState = {
+      song: queueData.queue[0],
+      isPlaying: false
+    };
+  }
   const [state, dispatch] = useReducer(songReducer, initialSongState);
+
+  useEffect(() => {
+    if (!loading) {
+      if (savedSongs?.songs[0]) {
+        dispatch({
+          type: 'SET_SONG',
+          payload: { song: savedSongs.songs[0] }
+        });
+      }
+    }
+  }, [loading]);
+
   const greaterThanMd = useMediaQuery((theme) => theme.breakpoints.up('md'));
   const greaterThanSm = useMediaQuery((theme) => theme.breakpoints.up('sm'));
 

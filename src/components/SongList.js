@@ -57,17 +57,17 @@ export default function SongList() {
         >
           <CardMedia
             image={song.thumbnail}
-            sx={{ objectFit: 'cover', width: 140, height: 100 }}
+            sx={{ objectFit: 'cover', width: 140 }}
           />
           <div
             style={{
-              width: '100%',
+              width: 'calc(100% - 140px)',
               display: 'flex',
               justifyContent: 'space-between'
             }}
           >
-            <CardContent>
-              <Typography gutterBottom variant='h5' component='h2'>
+            <CardContent sx={{ width: 'calc(100% - 125px)' }}>
+              <Typography gutterBottom variant='h6' component='h3' noWrap>
                 {song.title}
               </Typography>
               <Typography variant='body1' component='p' color='textSecondary'>
